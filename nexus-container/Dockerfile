@@ -8,6 +8,7 @@ ENV NEXUS_VERSION 2.11.4-01
 RUN cd $HOME \
    && curl https://sonatype-download.global.ssl.fastly.net/nexus/oss/nexus-$NEXUS_VERSION-bundle.tar.gz | tar xz \ 
    && mv nexus-$NEXUS_VERSION nexus
+   && mkdir /opt/jboss/sonatype-work && mkdir /opt/jboss/repositories && chmod -R o+w
 
 ENV NEXUS_WORK /opt/jboss/sonatype-work
 VOLUME ["/opt/jboss/sonatype-work"]
