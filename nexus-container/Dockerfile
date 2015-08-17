@@ -1,28 +1,63 @@
-FROM  jboss/base-jdk:7
+FROM centos:centos7
 
 EXPOSE 8081
 
 ENV NEXUS_VERSION 2.11.4-01
-ENV NEXUS_WORK /opt/jboss/sonatype-work
-ENV NEXUS_DATA /opt/jboss/repositories
-LABEL run docker run -it --rm --volumes-from nexus-data --name nexus-server -p 8081:8081 nexus-server
+ENV NEXUS_HOME /opt/nexus/nexus
+ENV NEXUS_WORK /sonatype-work
+ENV NEXUS_REPOS /repositories
 
+RUN yum install -y \
+  curl tar createrepo \
+  && yum clean all
+
+RUN cd /var/tmp \
+  && curl --fail --silent --location --retry 3 -O \
+  --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
+  http://download.oracle.com/otn-pub/java/jdk/7u76-b13/jdk-7u76-linux-x64.rpm \
+  && rpm -Ui jdk-7u76-linux-x64.rpm \
+  && rm -rf jdk-7u76-linux-x64.rpm
 
 # Install the binaries
-RUN cd $HOME \
-   && curl https://sonatype-download.global.ssl.fastly.net/nexus/oss/nexus-$NEXUS_VERSION-bundle.tar.gz | tar xz \ 
-   && mv nexus-$NEXUS_VERSION nexus \ 
-   && mkdir -p {$NEXUS_WORK,$NEXUS_DATA} && chmod -R o+w $HOME \
-   && chmod g+x $HOME/nexus/bin/nexus
+RUN mkdir -p /opt/nexus/nexus \
+  && curl --fail --silent --location --retry 3 \
+    https://download.sonatype.com/nexus/oss/nexus-${NEXUS_VERSION}-bundle.tar.gz \
+  | gunzip \
+  | tar x -C /tmp nexus-${NEXUS_VERSION} \
+  && mv /tmp/nexus-${NEXUS_VERSION}/* /opt/nexus/nexus/ \
+  && rm -rf /tmp/nexus-${NEXUS_VERSION}
+
+RUN  chmod 777 $NEXUS_HOME \ 
+   && mkdir -p $NEXUS_WORK && chmod -R 777 $NEXUS_WORK \
+   && mkdir -p $NEXUS_REPOS && chmod -R 777 $NEXUS_REPOS 
+#   \
+#   && chmod ago+x $NEXUS_HOME/bin/nexus \
+#    && for i in `find $HOME -type d`; do chmod 777 \$i; done
+
+RUN groupadd -r jboss -g 185 && useradd -u 185 -r -g jboss -m -d /home/jboss -s /sbin/nologin -c "JBoss user" jboss
 
 COPY scripts/readinessProbe.sh /usr/local/bin/readinessProbe.sh
-USER root
-RUN chown jboss:jboss /usr/local/bin/readinessProbe.sh && chmod 777 /usr/local/bin/readinessProbe.sh
+COPY scripts/fixPermissions.sh /usr/local/bin/fixPermissions.sh
+
+RUN chmod 755 /usr/local/bin/fixPermissions.sh 
+RUN  /usr/local/bin/fixPermissions.sh /opt/nexus
+RUN  /usr/local/bin/fixPermissions.sh $NEXUS_WORK
+RUN  /usr/local/bin/fixPermissions.sh $NEXUS_REPOS
+
 USER jboss
 
-VOLUME ["/opt/jboss/sonatype-work"]
-VOLUME ["/opt/jboss/repositories"]
+VOLUME ["/sonatype-work"]
+VOLUME ["/repositories"]
 
-# Define the entrypoint and cmd.
-ENTRYPOINT ["/opt/jboss/nexus/bin/nexus"]
-CMD ["console"]
+WORKDIR $NEXUS_HOME
+ENV CONTEXT_PATH /
+ENV MAX_HEAP 768m
+ENV MIN_HEAP 256m
+ENV JAVA_OPTS -server -XX:MaxPermSize=192m -Djava.net.preferIPv4Stack=true
+ENV LAUNCHER_CONF ${NEXUS_HOME}/conf/jetty.xml ${NEXUS_HOME}/conf/jetty-requestlog.xml
+CMD java \
+  -Dnexus-work=${SONATYPE_WORK} -Dnexus-webapp-context-path=${CONTEXT_PATH} -Dapplication-conf=${NEXUS_HOME}/conf \
+  -Xms${MIN_HEAP} -Xmx${MAX_HEAP} \
+  -cp '/opt/nexus/nexus/conf/:/opt/nexus/nexus/lib/*' \
+  ${JAVA_OPTS} \
+  org.sonatype.nexus.bootstrap.Launcher ${LAUNCHER_CONF}
