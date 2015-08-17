@@ -7,10 +7,6 @@ ENV NEXUS_HOME /opt/nexus/nexus
 ENV NEXUS_WORK /sonatype-work
 ENV NEXUS_REPOS /repositories
 
-RUN yum install -y \
-  curl tar createrepo \
-  && yum clean all
-
 RUN cd /var/tmp \
   && curl --fail --silent --location --retry 3 -O \
   --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
