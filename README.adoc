@@ -1,0 +1,33 @@
+= Developing Java applications using a Nexus Container for maven dependencies in OpenShift 3/Origin
+This sample project demonstrates how you can use Nexus in an OpenShift environment. How you can create applications that will fetch the dependencies from your internal nexus container.
+
+NOTE: This is a Proof of Concept. NOT SUPPORTED!!!
+
+
+== Run the Nexus container
+
+=== Install the template
+
+In your project or in openshift project 
+
+----
+$ oc create -f ose3/nexus-template.json
+----
+
+=== Create a nexus instance
+
+----
+$ oc new-app --template=nexus -p APPLICATION_NAME=nexus-ose
+----
+
+By default, this will be published in: http://nexus-ose.<YOUR_DOMAIN>
+
+You can specify a domain like:
+
+----
+$ oc new-app --template=nexus -p APPLICATION_NAME=nexus,APPLICATION_HOSTNAME=mynexus.example.com
+----
+
+== Configure your applications
+
+TODO: This is not yet done

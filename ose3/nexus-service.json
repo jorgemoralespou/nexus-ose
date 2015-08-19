@@ -1,0 +1,24 @@
+{
+   "kind": "Service",
+   "apiVersion": "v1",
+   "metadata": {
+      "name": "nexus",
+      "labels": {
+         "app": "nexus"
+      }
+   },
+   "spec": {
+      "ports": [
+         {
+            "name": "nexus-http",
+            "port": 8081,
+            "targetPort": 8081
+         }
+      ],
+      "selector": {
+         "deploymentconfig": "nexus"
+      },
+      "type": "ClusterIP",
+      "sessionAffinity": "None"
+   }
+}

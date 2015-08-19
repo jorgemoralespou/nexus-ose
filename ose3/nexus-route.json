@@ -1,0 +1,14 @@
+{
+   "kind": "Route",
+   "apiVersion": "v1",
+   "metadata": {
+      "name": "nexus"
+   },
+   "spec": {
+      "host": "",
+      "to": {
+         "kind": "Service",
+         "name": "nexus"
+      }
+   }
+}
