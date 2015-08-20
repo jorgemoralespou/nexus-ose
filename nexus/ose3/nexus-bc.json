@@ -32,7 +32,7 @@
             "uri": "https://github.com/jorgemoralespou/nexus-ose",
             "ref": "master"
          },
-         "contextDir": "nexus-container"
+         "contextDir": "nexus/nexus-container"
       },
       "strategy": {
          "type": "Docker",

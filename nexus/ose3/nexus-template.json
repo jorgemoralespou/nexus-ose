@@ -31,7 +31,7 @@
       {
          "description": "Git Directory",
          "name": "CONTEXT_DIR",
-         "value": "nexus-container"
+         "value": "nexus/nexus-container"
       },
       {
          "description": "Github trigger secret",
