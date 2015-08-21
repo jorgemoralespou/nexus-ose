@@ -132,7 +132,7 @@
       </pluginRepositories>
     </profile>
   </profiles>
-
+<!--
   <mirrors>
         <mirror>
             <id>nexus</id>
@@ -158,4 +158,5 @@
   <activeProfiles>
     <activeProfile>nexus</activeProfile>
   </activeProfiles>
+->  
 </settings>
