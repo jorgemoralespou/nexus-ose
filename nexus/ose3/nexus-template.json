@@ -44,7 +44,7 @@
          "name": "GENERIC_TRIGGER_SECRET",
          "from": "[a-zA-Z0-9]{8}",
          "generate": "expression"
-      }      
+      }
    ],
    "objects": [
       {
