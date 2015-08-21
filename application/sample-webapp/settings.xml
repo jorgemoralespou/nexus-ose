@@ -7,16 +7,10 @@
     <!-- Configure the Internal Nexus Maven repository -->
     <profile>
       <id>nexus</id>
-      <activation>
-        <property>
-          <name>nexus</name>
-          <value/>
-        </property>
-      </activation>
       <repositories>
         <repository>
           <id>nexus-repository</id>
-          <url>http://nexus.ci-tools.svc.cluster.local:8081/content/groups/public/</url>
+          <url>http://NEXUS</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -28,7 +22,7 @@
       <pluginRepositories>
         <pluginRepository>
           <id>nexus-plugin-repository</id>
-          <url>http://nexus.ci-tools.svc.cluster.local:8081/content/groups/public/</url>
+          <url>http://NEXUS</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -132,11 +126,10 @@
       </pluginRepositories>
     </profile>
   </profiles>
-<!--
   <mirrors>
         <mirror>
             <id>nexus</id>
-            <mirrorOf>*</mirrorOf>
+            <mirrorOf>nexus</mirrorOf>
             <url>http://nexus.ci-tools.svc.cluster.local:8081/content/groups/public/</url>
         </mirror>
          <mirror>
@@ -151,12 +144,9 @@
          </mirror>
          <mirror>
             <id>securecentral</id>
-            <mirrorOf>securecentral</mirrorOf>
+            <mirrorOf>*</mirrorOf>
             <url>https://repo1.maven.org/maven2/</url>
          </mirror>
       </mirrors>
-  <activeProfiles>
-    <activeProfile>nexus</activeProfile>
-  </activeProfiles>
--->  
+
 </settings>
