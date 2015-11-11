@@ -6,19 +6,22 @@ NOTE: This is a Proof of Concept. NOT SUPPORTED!!!
 
 
 == Run the Nexus container
+Nexus container will run in the openshift-infra project.
+
+NOTE: These steps need to be done as a *cluster admin* user
 
 === Install the template
-
 In your project or in openshift project 
 
 ----
-$ oc create -f nexus/ose3/nexus-template.json
+$ oc create -f nexus/ose3/nexus-template.json -n openshift
 ----
 
 === Create a nexus instance
 
 ----
-$ oc new-app --template=nexus -p APPLICATION_NAME=nexus-ose
+$ oc new-project ci-tools
+$ oc new-app --template=nexus -p APPLICATION_NAME=nexus-ose -n ci-tools
 ----
 
 By default, this will be published in: http://nexus-ose.<YOUR_DOMAIN>
@@ -26,19 +29,52 @@ By default, this will be published in: http://nexus-ose.<YOUR_DOMAIN>
 You can specify a domain like:
 
 ----
-$ oc new-app --template=nexus -p APPLICATION_NAME=nexus,APPLICATION_HOSTNAME=mynexus.example.com
+$ oc new-app --template=nexus -p APPLICATION_NAME=nexus,APPLICATION_HOSTNAME=nexus.example.com -n ci-tools
 ----
 
-== Import your EAP templates
+=== Test your nexus instance
+As you have installed the nexus in the openshift-infra roject, the fastest way to see it running is accesing the DNS that you have assigned to your nexus server.
+
+In a broser, access your the provided DNS. http://nexus.example.com[In my example]
+
+=== Details to know
+The service we just created is internally accesible at:
+
+* *External DNS*: nexus.example.com
+* *Internal DNS*: nexus.ci-tools.svc.cluster.local
+
+This means that we can use this internal DNS address in our application to point to the nexus server.
+
+== Create your application
+We are going to demonstrate how you can use this nexus server in different runtimes.
+
+NOTE: These steps can be run as a regular user.
+
+* The first thing we need to do is create a project for our applications. We will call it sample.
+
+----
+$ oc new-project sample
+----
+
+* Now we are going to import our predefined set of templates for creating applications with these runtimes.
+
+----
+$ 
+----
+
+
+=== Using EAP
+
+==== Import your EAP templates
 If you are using Origin, you must import the application server templates we are going to be using. For OSE the templates are already there. 
 
 ----
 $ oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/eap/eap6-basic-sti.json
 $ oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/secrets/eap-app-secret.json
-
 ----
 
 
-== Configure your applications
+=== Using Wildfly
 
-TODO: This is not yet done
+=== Using Spring Boot
+

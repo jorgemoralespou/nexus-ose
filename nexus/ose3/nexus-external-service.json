@@ -1,0 +1,36 @@
+{
+   "kind": "List",
+   "apiVersion": "v1",
+   "metadata": {
+      "name": "nexus-external"
+   },
+   "items": [
+      {
+         "kind": "Service",
+         "apiVersion": "v1",
+         "metadata": {
+            "name": "nexus-external"
+         },
+         "spec": {
+            "ports": [
+               {
+                  "name": "nexus-external",
+                  "port": 8080,
+                  "targetPort": 8080
+               }
+            ]
+         },
+         "selector": {}
+      },
+      {
+         "kind": "Endpoints",
+         "apiVersion": "v1",
+         "metadata": {
+            "name": "nexus-external"
+         },
+         "endpoints": [
+            "maven.repository.redhat.com:8080"
+         ]
+      }
+   ]
+}

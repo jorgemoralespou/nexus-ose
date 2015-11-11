@@ -2,10 +2,7 @@
    "kind": "DeploymentConfig",
    "apiVersion": "v1",
    "metadata": {
-      "name": "nexus",
-      "labels": {
-         "app": "nexus"
-      }
+      "name": "nexus"
    },
    "spec": {
       "strategy": {
@@ -42,11 +39,18 @@
       "template": {
          "metadata": {
             "labels": {
-               "deploymentconfig": "nexus",
-               "application": "nexus"
+               "deploymentconfig": "nexus"
             }
          },
          "spec": {
+            "volumes": [
+               {
+                  "name": "pvol",
+                  "persistentVolumeClaim": {
+                     "claimName": "nexus-claim"
+                  }
+               }
+            ],
             "containers": [
                {
                   "name": "nexus",
@@ -57,9 +61,26 @@
                         "protocol": "TCP"
                      }
                   ],
+                  "volumeMounts": [
+                     {
+                        "name": "pvol",
+                        "mountPath": "/sonatype-work"
+                     }
+                  ],
+                  "livenessProbe": {
+                     "tcpSocket": {
+                        "port": 8081
+                     },
+                     "initialDelaySeconds": 180,
+                     "timeoutSeconds": 1
+                  },
                   "resources": {},
                   "terminationMessagePath": "/dev/termination-log",
-                  "imagePullPolicy": "Always"
+                  "imagePullPolicy": "IfNotPresent",
+                  "securityContext": {
+                     "capabilities": {},
+                     "privileged": false
+                  }
                }
             ],
             "restartPolicy": "Always",

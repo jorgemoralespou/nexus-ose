@@ -1,70 +1,28 @@
 {
-   "kind": "Template",
+   "kind": "List",
    "apiVersion": "v1",
    "metadata": {
       "name": "nexus"
    },
-   "labels": {
-      "application": "nexus",
-      "createdBy": "template-nexus"
-   },
-   "parameters": [
-      {
-         "description": "The name for the application.",
-         "name": "APPLICATION_NAME",
-         "value": "nexus"
-      },
-      {
-         "description": "Custom hostname for service routes.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
-         "name": "APPLICATION_HOSTNAME"
-      },
-      {
-         "description": "Git source URI for application",
-         "name": "GIT_URI",
-         "value": "https://github.com/jorgemoralespou/nexus-ose"
-      },
-      {
-         "description": "Git branch/tag reference",
-         "name": "GIT_REF",
-         "value": "master"
-      },
-      {
-         "description": "Git Directory",
-         "name": "CONTEXT_DIR",
-         "value": "nexus/nexus-container"
-      },
-      {
-         "description": "Github trigger secret",
-         "name": "GITHUB_TRIGGER_SECRET",
-         "from": "[a-zA-Z0-9]{8}",
-         "generate": "expression"
-      },
-      {
-         "description": "Generic build trigger secret",
-         "name": "GENERIC_TRIGGER_SECRET",
-         "from": "[a-zA-Z0-9]{8}",
-         "generate": "expression"
-      }
-   ],
-   "objects": [
+   "items": [
       {
          "kind": "BuildConfig",
          "apiVersion": "v1",
          "metadata": {
-            "name": "${APPLICATION_NAME}"
+            "name": "nexus"
          },
          "spec": {
             "triggers": [
                {
                   "type": "GitHub",
                   "github": {
-                     "secret": "${GITHUB_TRIGGER_SECRET}"
+                     "secret": "secret"
                   }
                },
                {
                   "type": "Generic",
                   "generic": {
-                     "secret": "${GENERIC_TRIGGER_SECRET}"
+                     "secret": "secret"
                   }
                },
                {
@@ -75,10 +33,10 @@
             "source": {
                "type": "Git",
                "git": {
-                  "uri": "${GIT_URI}",
-                  "ref": "${GIT_REF}"
+                  "uri": "https://github.com/jorgemoralespou/nexus-ose",
+                  "ref": "master"
                },
-               "contextDir": "${CONTEXT_DIR}"
+               "contextDir": "nexus/nexus-container"
             },
             "strategy": {
                "type": "Docker",
@@ -92,7 +50,7 @@
             "output": {
                "to": {
                   "kind": "ImageStreamTag",
-                  "name": "${APPLICATION_NAME}:latest"
+                  "name": "nexus:latest"
                }
             },
             "resources": {}
@@ -112,7 +70,7 @@
          "kind": "ImageStream",
          "apiVersion": "v1",
          "metadata": {
-            "name": "${APPLICATION_NAME}"
+            "name": "nexus"
          },
          "spec": {
             "dockerImageRepository": "",
@@ -145,7 +103,7 @@
          "kind": "DeploymentConfig",
          "apiVersion": "v1",
          "metadata": {
-            "name": "${APPLICATION_NAME}"
+            "name": "nexus"
          },
          "spec": {
             "strategy": {
@@ -166,23 +124,23 @@
                   "imageChangeParams": {
                      "automatic": true,
                      "containerNames": [
-                        "${APPLICATION_NAME}"
+                        "nexus"
                      ],
                      "from": {
                         "kind": "ImageStreamTag",
-                        "name": "${APPLICATION_NAME}:latest"
+                        "name": "nexus:latest"
                      }
                   }
                }
             ],
             "replicas": 1,
             "selector": {
-               "deploymentconfig": "${APPLICATION_NAME}"
+               "deploymentconfig": "nexus"
             },
             "template": {
                "metadata": {
                   "labels": {
-                     "deploymentconfig": "${APPLICATION_NAME}"
+                     "deploymentconfig": "nexus"
                   }
                },
                "spec": {
@@ -196,8 +154,8 @@
                   ],
                   "containers": [
                      {
-                        "name": "${APPLICATION_NAME}",
-                        "image": "${APPLICATION_NAME}",
+                        "name": "nexus",
+                        "image": "nexus",
                         "ports": [
                            {
                               "containerPort": 8081,
@@ -236,16 +194,13 @@
          "kind": "Route",
          "apiVersion": "v1",
          "metadata": {
-            "name": "${APPLICATION_NAME}",
-            "annotations": {
-               "openshift.io/host.generated": "false"
-            }
+            "name": "nexus"
          },
          "spec": {
-            "host": "${APPLICATION_HOSTNAME}",
+            "host": "",
             "to": {
                "kind": "Service",
-               "name": "${APPLICATION_NAME}"
+               "name": "nexus"
             }
          }
       },
@@ -253,18 +208,18 @@
          "kind": "Service",
          "apiVersion": "v1",
          "metadata": {
-            "name": "${APPLICATION_NAME}"
+            "name": "nexus"
          },
          "spec": {
             "ports": [
                {
-                  "name": "${APPLICATION_NAME}-http",
+                  "name": "nexus-http",
                   "port": 8081,
                   "targetPort": 8081
                }
             ],
             "selector": {
-               "deploymentconfig": "${APPLICATION_NAME}"
+               "deploymentconfig": "nexus"
             },
             "type": "ClusterIP",
             "sessionAffinity": "None"
