@@ -6,6 +6,13 @@
    },
    "items": [
       {
+         "kind": "ServiceAccount",
+         "apiVersion": "v1",
+         "metadata": {
+            "name": "nexus"
+         }
+      },
+      {
          "kind": "BuildConfig",
          "apiVersion": "v1",
          "metadata": {
@@ -89,7 +96,7 @@
          },
          "spec": {
             "accessModes": [
-               "ReadWriteMany"
+               "ReadWriteOnce"
             ],
             "resources": {
                "requests": {
@@ -112,6 +119,15 @@
                   "updatePeriodSeconds": 1,
                   "intervalSeconds": 1,
                   "timeoutSeconds": 600
+               },
+               "post": {
+                  "failurePolicy": "Ignore",
+                  "execNewPod": {
+                     "containerName": "nexus",
+                     "command": [
+                        "/usr/local/bin/addjbossrepos.sh"
+                     ]
+                  }
                },
                "resources": {}
             },
@@ -185,7 +201,9 @@
                      }
                   ],
                   "restartPolicy": "Always",
-                  "dnsPolicy": "ClusterFirst"
+                  "dnsPolicy": "ClusterFirst",
+                  "serviceAccountName": "nexus",
+                  "serviceAccount": "nexus"
                }
             }
          }
