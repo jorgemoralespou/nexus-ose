@@ -16,7 +16,7 @@
       <repositories>
         <repository>
           <id>nexus-repository</id>
-          <url>https://nexus.ci-tools.svc.cluster.local:8081/content/groups/public/</url>
+          <url>http://nexus.ci-tools.svc.cluster.local:8081/content/groups/public/</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -28,7 +28,7 @@
       <pluginRepositories>
         <pluginRepository>
           <id>nexus-plugin-repository</id>
-          <url>https://nexus.ci-tools.svc.cluster.local:8081/content/groups/public/</url>
+          <url>http://nexus.ci-tools.svc.cluster.local:8081/content/groups/public/</url>
           <releases>
             <enabled>true</enabled>
           </releases>
