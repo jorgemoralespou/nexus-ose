@@ -184,9 +184,9 @@ if [ -f "$LOCAL_SOURCE_DIR/pom.xml" ]; then
   fi
   # If MAVEN_SETTINGS specified, must be relative to application root
   if [ -z "$MAVEN_SETTINGS" ]; then
-    export MAVEN_ARGS="$MAVEN_ARGS -s $LOCAL_SOURCE_DIR/$MAVEN_SETTINGS"
-  else
     export MAVEN_ARGS="$MAVEN_ARGS -s /usr/local/m2/settings.xml"
+  else
+    export MAVEN_ARGS="$MAVEN_ARGS -s $LOCAL_SOURCE_DIR/$MAVEN_SETTINGS"
   fi
   echo "Found pom.xml... attempting to build with 'mvn ${MAVEN_ARGS}'"
 
