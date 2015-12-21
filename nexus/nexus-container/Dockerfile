@@ -14,6 +14,12 @@ RUN cd /var/tmp \
   && rpm -Ui jdk-7u76-linux-x64.rpm \
   && rm -rf jdk-7u76-linux-x64.rpm
 
+# Install jq
+RUN curl --fail --silent --location --retry 3 \
+    https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
+    -o /usr/local/bin/jq \
+    chmod 755 /usr/local/bin/jq
+
 # Install the binaries
 RUN mkdir -p /opt/nexus/nexus \
   && curl --fail --silent --location --retry 3 \
