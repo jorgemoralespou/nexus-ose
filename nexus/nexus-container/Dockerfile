@@ -18,7 +18,7 @@ RUN cd /var/tmp \
 RUN curl --fail --silent --location --retry 3 \
     https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
     -o /usr/local/bin/jq \
-    chmod 755 /usr/local/bin/jq
+    && chmod 755 /usr/local/bin/jq
 
 # Install the binaries
 RUN mkdir -p /opt/nexus/nexus \
