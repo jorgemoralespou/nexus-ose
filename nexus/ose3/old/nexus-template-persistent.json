@@ -1,98 +1,62 @@
 {
-   "kind": "List",
+   "kind": "Template",
    "apiVersion": "v1",
    "metadata": {
-      "name": "nexus"
+      "name": "nexus-persistent",
+      "namespace": "openshift",
+      "annotations": {
+            "description": "Nexus service, with persistent storage. Scaling to more than one replica is not supported",
+            "tags": "repository-managers,nexus"
+        }
    },
-   "items": [
+   "labels": {
+      "application": "nexus-persistent",
+      "createdBy": "template-nexus"
+   },
+   "parameters": [
       {
-         "kind": "ServiceAccount",
-         "apiVersion": "v1",
-         "metadata": {
-            "name": "nexus"
-         }
+         "description": "The name for the application. The service will be named like the application.",
+         "displayName": "Application name.",
+         "name": "APPLICATION_NAME",
+         "value": "nexus"
       },
       {
-         "kind": "BuildConfig",
-         "apiVersion": "v1",
-         "metadata": {
-            "name": "nexus"
-         },
-         "spec": {
-            "triggers": [
-               {
-                  "type": "GitHub",
-                  "github": {
-                     "secret": "secret"
-                  }
-               },
-               {
-                  "type": "Generic",
-                  "generic": {
-                     "secret": "secret"
-                  }
-               },
-               {
-                  "type": "ImageChange",
-                  "imageChange": {}
-               }
-            ],
-            "source": {
-               "type": "Git",
-               "git": {
-                  "uri": "https://github.com/jorgemoralespou/nexus-ose",
-                  "ref": "master"
-               },
-               "contextDir": "nexus/nexus-container"
-            },
-            "strategy": {
-               "type": "Docker",
-               "dockerStrategy": {
-                  "from": {
-                     "kind": "ImageStreamTag",
-                     "name": "centos:centos7"
-                  }
-               }
-            },
-            "output": {
-               "to": {
-                  "kind": "ImageStreamTag",
-                  "name": "nexus:latest"
-               }
-            },
-            "resources": {}
-         }
+         "description": "Custom hostname for service routes.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
+         "displayName": "Nexus instance hostname",
+         "name": "APPLICATION_HOSTNAME"
       },
       {
-         "kind": "ImageStream",
-         "apiVersion": "v1",
-         "metadata": {
-            "name": "centos"
-         },
-         "spec": {
-            "dockerImageRepository": "library/centos:centos7"
-         }
+         "description": "Persistent Volume Size (512Mi, 5Gi,...)",
+         "displayName": "Persistent Volume Size",
+         "name": "SIZE",
+         "value": "5Gi"
       },
       {
-         "kind": "ImageStream",
-         "apiVersion": "v1",
-         "metadata": {
-            "name": "nexus"
-         },
-         "spec": {
-            "dockerImageRepository": "",
-            "tags": [
-               {
-                  "name": "latest"
-               }
-            ]
-         }
+         "description": "Nexus image name",
+         "displayName": "Nexus image name",
+         "name": "IMAGE_NAME",
+         "value": "nexus"
       },
+      {
+         "description": "Nexus image tag",
+         "displayName": "Nexus image tag",
+         "name": "IMAGE_TAG",
+         "value": "latest"
+      },
+      {
+         "description": "Nexus image namespace",
+         "displayName": "Nexus image namespace",
+         "name": "IMAGE_NAMESPACE",
+         "value": "openshift"
+      }
+   ],
+   "objects": [
       {
          "kind": "PersistentVolumeClaim",
          "apiVersion": "v1",
          "metadata": {
-            "name": "nexus-claim"
+            "name": "nexus-claim",
+            "namespace": "default"
          },
          "spec": {
             "accessModes": [
@@ -100,7 +64,7 @@
             ],
             "resources": {
                "requests": {
-                  "storage": "5Gi"
+                  "storage": "${SIZE}"
                }
             },
             "volumeName": "nexus-pv"
@@ -110,7 +74,8 @@
          "kind": "DeploymentConfig",
          "apiVersion": "v1",
          "metadata": {
-            "name": "nexus"
+            "name": "nexus",
+            "namespace": "default"
          },
          "spec": {
             "strategy": {
@@ -144,7 +109,8 @@
                      ],
                      "from": {
                         "kind": "ImageStreamTag",
-                        "name": "nexus:latest"
+                        "name": "${IMAGE_NAME}:${IMAGE_TAG}",
+                        "namespace": "${IMAGE_NAMESPACE}"
                      }
                   }
                }
@@ -185,13 +151,24 @@
                            }
                         ],
                         "livenessProbe": {
-                           "tcpSocket": {
+                           "httpGet": {
                               "port": 8081
                            },
                            "initialDelaySeconds": 180,
                            "timeoutSeconds": 1
                         },
-                        "resources": {},
+                        "readinessProbe": {
+                           "httpGet": {
+                              "port": 8081
+                           },
+                           "initialDelaySeconds": 20,
+                           "timeoutSeconds": 1
+                        },
+                        "resources": {
+                           "requests": {
+                              "memory": "2Gi"
+                           }
+                        },
                         "terminationMessagePath": "/dev/termination-log",
                         "imagePullPolicy": "IfNotPresent",
                         "securityContext": {
@@ -212,10 +189,11 @@
          "kind": "Route",
          "apiVersion": "v1",
          "metadata": {
-            "name": "nexus"
+            "name": "nexus",
+            "namespace": "default"
          },
          "spec": {
-            "host": "",
+            "host": "${APPLICATION_HOSTNAME}",
             "to": {
                "kind": "Service",
                "name": "nexus"
@@ -226,12 +204,13 @@
          "kind": "Service",
          "apiVersion": "v1",
          "metadata": {
-            "name": "nexus"
+            "name": "nexus",
+            "namespace": "default"
          },
          "spec": {
             "ports": [
                {
-                  "name": "nexus-http",
+                  "name": "http",
                   "port": 8081,
                   "targetPort": 8081
                }

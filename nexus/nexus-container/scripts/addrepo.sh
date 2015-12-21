@@ -9,7 +9,7 @@ TEMPLATE_FILE="/tmp/repo.json"
 
 : ${NEXUS_USER:="admin"}
 : ${NEXUS_PASSWORD:="admin123"}
-: ${NEXUS_BASE_URL:="http://localhost:8080"}
+: ${NEXUS_BASE_URL:="http://localhost:8081"}
 
 read -d '' TEMPLATE << EOF
 {
