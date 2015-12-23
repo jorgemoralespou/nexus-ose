@@ -1,0 +1,3 @@
+FROM docker.io/openshift/wildfly-90-centos7:latest
+
+COPY settings.xml /usr/local/m2/

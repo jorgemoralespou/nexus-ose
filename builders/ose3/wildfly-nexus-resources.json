@@ -1,0 +1,329 @@
+{
+   "kind": "List",
+   "apiVersion": "v1",
+   "metadata": {
+      "name": "wildfly-nexus"
+   },
+   "items": [
+      {
+         "kind": "BuildConfig",
+         "apiVersion": "v1",
+         "metadata": {
+            "name": "wildfly-nexus-8"
+         },
+         "spec": {
+            "triggers": [
+               {
+                  "type": "GitHub",
+                  "github": {
+                     "secret": "secret"
+                  }
+               },
+               {
+                  "type": "Generic",
+                  "generic": {
+                     "secret": "secret"
+                  }
+               },
+               {
+                  "type": "ImageChange",
+                  "imageChange": {}
+               }
+            ],
+            "source": {
+               "type": "Git",
+               "git": {
+                  "uri": "https://github.com/jorgemoralespou/nexus-ose",
+                  "ref": "master"
+               },
+               "contextDir": "builders/wildfly-nexus/8.1"
+            },
+            "strategy": {
+               "type": "Docker",
+               "dockerStrategy": {
+                  "from": {
+                     "kind": "ImageStreamTag",
+                     "name": "wildfly-8:latest"
+                  }
+               }
+            },
+            "output": {
+               "to": {
+                  "kind": "ImageStreamTag",
+                  "name": "wildfly-nexus-8:latest"
+               }
+            },
+            "resources": {}
+         }
+      },
+      {
+         "kind": "BuildConfig",
+         "apiVersion": "v1",
+         "metadata": {
+            "name": "wildfly-nexus-9"
+         },
+         "spec": {
+            "triggers": [
+               {
+                  "type": "GitHub",
+                  "github": {
+                     "secret": "secret"
+                  }
+               },
+               {
+                  "type": "Generic",
+                  "generic": {
+                     "secret": "secret"
+                  }
+               },
+               {
+                  "type": "ImageChange",
+                  "imageChange": {}
+               }
+            ],
+            "source": {
+               "type": "Git",
+               "git": {
+                  "uri": "https://github.com/jorgemoralespou/nexus-ose",
+                  "ref": "master"
+               },
+               "contextDir": "builders/wildfly-nexus/9.0"
+            },
+            "strategy": {
+               "type": "Docker",
+               "dockerStrategy": {
+                  "from": {
+                     "kind": "ImageStreamTag",
+                     "name": "wildfly-9:latest"
+                  }
+               }
+            },
+            "output": {
+               "to": {
+                  "kind": "ImageStreamTag",
+                  "name": "wildfly-nexus-9:latest"
+               }
+            },
+            "resources": {}
+         }
+      },
+      {
+         "kind": "BuildConfig",
+         "apiVersion": "v1",
+         "metadata": {
+            "name": "wildfly-nexus-10"
+         },
+         "spec": {
+            "triggers": [
+               {
+                  "type": "GitHub",
+                  "github": {
+                     "secret": "secret"
+                  }
+               },
+               {
+                  "type": "Generic",
+                  "generic": {
+                     "secret": "secret"
+                  }
+               },
+               {
+                  "type": "ImageChange",
+                  "imageChange": {}
+               }
+            ],
+            "source": {
+               "type": "Git",
+               "git": {
+                  "uri": "https://github.com/jorgemoralespou/nexus-ose",
+                  "ref": "master"
+               },
+               "contextDir": "builders/wildfly-nexus/10.0"
+            },
+            "strategy": {
+               "type": "Docker",
+               "dockerStrategy": {
+                  "from": {
+                     "kind": "ImageStreamTag",
+                     "name": "wildfly-10:latest"
+                  }
+               }
+            },
+            "output": {
+               "to": {
+                  "kind": "ImageStreamTag",
+                  "name": "wildfly-nexus-10:latest"
+               }
+            },
+            "resources": {}
+         }
+      },
+      {
+         "apiVersion": "v1",
+         "kind": "ImageStream",
+         "metadata": {
+            "creationTimestamp": null,
+            "name": "wildfly-8"
+         },
+         "spec": {
+            "tags": [
+               {
+                  "from": {
+                     "Kind": "ImageStreamTag",
+                     "Name": "8.1"
+                  },
+                  "name": "latest"
+               },
+               {
+                  "annotations": {
+                     "description": "Build and run Java applications on Wildfly 8.1",
+                     "iconClass": "icon-wildfly",
+                     "sampleRepo": "https://github.com/bparees/openshift-jee-sample.git",
+                     "supports": "wildfly:8.1,jee,java",
+                     "tags": "builder,wildfly,java",
+                     "version": "8.1"
+                  },
+                  "from": {
+                     "Kind": "DockerImage",
+                     "Name": "openshift/wildfly-81-centos7:latest"
+                  },
+                  "name": "8.1"
+               }
+            ]
+         }
+      },
+      {
+         "apiVersion": "v1",
+         "kind": "ImageStream",
+         "metadata": {
+            "name": "wildfly-9"
+         },
+         "spec": {
+            "tags": [
+               {
+                  "from": {
+                     "Kind": "ImageStreamTag",
+                     "Name": "9.0"
+                  },
+                  "name": "latest"
+               },
+               {
+                  "annotations": {
+                     "description": "Build and run Java applications on Wildfly 9.0",
+                     "iconClass": "icon-wildfly",
+                     "sampleRepo": "https://github.com/bparees/openshift-jee-sample.git",
+                     "supports": "wildfly:9.0,jee,java",
+                     "tags": "builder,wildfly,java",
+                     "version": "9.0"
+                  },
+                  "from": {
+                     "Kind": "DockerImage",
+                     "Name": "openshift/wildfly-90-centos7:latest"
+                  },
+                  "name": "9.0"
+               }
+            ]
+         }
+      },
+      {
+         "apiVersion": "v1",
+         "kind": "ImageStream",
+         "metadata": {
+            "name": "wildfly-10"
+         },
+         "spec": {
+            "tags": [
+               {
+                  "from": {
+                     "Kind": "ImageStreamTag",
+                     "Name": "10.0"
+                  },
+                  "name": "latest"
+               },
+               {
+                  "annotations": {
+                     "description": "Build and run Java applications on Wildfly 10.0",
+                     "iconClass": "icon-wildfly",
+                     "sampleRepo": "https://github.com/bparees/openshift-jee-sample.git",
+                     "supports": "wildfly:10.0,jee,java",
+                     "tags": "builder,wildfly,java",
+                     "version": "10.0"
+                  },
+                  "from": {
+                     "Kind": "DockerImage",
+                     "Name": "openshift/wildfly-100-centos7:latest"
+                  },
+                  "name": "10.0"
+               }
+            ]
+         }
+      },
+      {
+         "apiVersion": "v1",
+         "kind": "ImageStream",
+         "metadata": {
+            "creationTimestamp": null,
+            "name": "wildfly-nexus-8"
+         },
+         "spec": {
+            "tags": [
+               {
+                  "annotations": {
+                     "description": "Build and run Java applications on Wildfly 8.1 using Nexus",
+                     "iconClass": "icon-wildfly",
+                     "sampleRepo": "https://github.com/bparees/openshift-jee-sample.git",
+                     "supports": "wildfly:8.1,jee,java",
+                     "tags": "builder,wildfly,java,nexus",
+                     "version": "8.1"
+                  },
+                  "name": "latest"
+               }
+            ]
+         }
+      },
+      {
+         "apiVersion": "v1",
+         "kind": "ImageStream",
+         "metadata": {
+            "name": "wildfly-nexus-9"
+         },
+         "spec": {
+            "tags": [
+               {
+                  "annotations": {
+                     "description": "Build and run Java applications on Wildfly 9.0 using Nexus",
+                     "iconClass": "icon-wildfly",
+                     "sampleRepo": "https://github.com/bparees/openshift-jee-sample.git",
+                     "supports": "wildfly:9.0,jee,java",
+                     "tags": "builder,wildfly,java,nexus",
+                     "version": "9.0"
+                  },
+                  "name": "latest"
+               }
+            ]
+         }
+      },
+      {
+         "apiVersion": "v1",
+         "kind": "ImageStream",
+         "metadata": {
+            "name": "wildfly-nexus-10"
+         },
+         "spec": {
+            "tags": [
+               {
+                  "annotations": {
+                     "description": "Build and run Java applications on Wildfly 10.0 using Nexus",
+                     "iconClass": "icon-wildfly",
+                     "sampleRepo": "https://github.com/bparees/openshift-jee-sample.git",
+                     "supports": "wildfly:10.0,jee,java",
+                     "tags": "builder,wildfly,java,nexus",
+                     "version": "10.0"
+                  },
+                  "name": "latest"
+               }
+            ]
+         }
+      }
+   ]
+}

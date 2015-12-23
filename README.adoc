@@ -1,4 +1,4 @@
-= Developing Java applications using a Nexus Container for maven dependencies in OpenShift 3/Origin
+= Developing Java applications using a Nexus Container for maven dependencies in OpenShift Origin / OpenShift 3
 
 This sample project demonstrates how you can use Nexus in an OpenShift environment. How you can create applications that will fetch the dependencies from your internal nexus container.
 
@@ -6,6 +6,7 @@ NOTE: This is a Proof of Concept. NOT SUPPORTED!!!
 
 
 The steps that will be done are the following:
+
 * Deploy a nexus container configured for accessing Red Hat's maven repository
 * Install all base images we will be using
 ** Centos: centos:cetos7
@@ -21,6 +22,7 @@ Our nexus instance will live in a project called (*ci*), so to start, we need to
 
 ----
 oc new-project ci --display-name="Continuous Integration for OpenShift" --description="This project holds all continuous integration required infrastructure, like Nexus, Jenkins,..."
+
 oc create -f nexus/ose3/nexus-resources.json -n ci
 ----
 
@@ -51,23 +53,35 @@ image:images/nexus_console.png[Nexus console]
 NOTE: If you want to create a nexus persistent instance, you need to provide with a persistent volume named: *nexus-pv* with *ReadWriteOnce* mode and the ammount of space that you wish. You can use hostPath, nfs, or any other storage. See examples link:nexus/ose3/resources/pv/[here]: 
 
 
-NOW YOU HAVE A NEXUS SERVER, UP AND RUNNING AND INTERNALLY AVAILABLE AT:
+It is very important to know that the service is available through DNS internally to all other applications running in OpenShift in the following name: 
 
 ----
 nexus.ci.svc.cluster.local
 ----
 
+Also, important to understand that if OpenShift is configured with the SDN multitenant plugin, you need to allow access to this project (*ci*) from any other project that wants to use it, or by making the ci project global, with:
+
+----
+oadm pod-network make-projects-global ci 
+----
+
+
 == Install all base images we will be using
+Even if these base images should already be installed with an OpenShift installation, I will assume they are not, as some of the examples will be based on the Com
 
-=== Centos: centos:cetos7
 
-=== Wildfly 8: docker.io/openshift/wildfly-81-centos
-
-=== EAP 6: registry.access.redhat.com/jboss-eap-6/eap-openshift
+https://raw.githubusercontent.com/openshift/origin/master/examples/image-streams/image-streams-centos7.json
+https://raw.githubusercontent.com/jboss-openshift/application-templates/ose-v1.2.0/jboss-image-streams.json
 
 == Create a version of wildfly and EAP S2I images that will use by default the nexus instance created 
 
+
 == Create a version of templates using this new S2I images
+Using as base the https://raw.githubusercontent.com/jboss-openshift/application-templates/ose-v1.2.0/eap/eap64-basic-s2i.json
+[EAP 6.4 template], I will modify and create a new version that will use the EAP version that we just created.
+
+----
+----
 
 == Create a sample application using Wildfly-nexus S2I image
 
