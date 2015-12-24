@@ -49,15 +49,13 @@ image:images/nexus_pod.png[Nexus application]
 
 image:images/nexus_console.png[Nexus console]
 
+NOTE: By default, nexus credentials will be *admin/admin123*
 
-NOTE: If you want to create a nexus persistent instance, you need to provide with a persistent volume named: *nexus-pv* with *ReadWriteOnce* mode and the ammount of space that you wish. You can use hostPath, nfs, or any other storage. See examples link:nexus/ose3/resources/pv/[here]: 
+=== Details to know
+It is very important to know that the service is available through DNS internally to all other applications running in OpenShift, and externally at the provided hostname: 
 
-
-It is very important to know that the service is available through DNS internally to all other applications running in OpenShift in the following name: 
-
-----
-nexus.ci.svc.cluster.local
-----
+* *External DNS*: nexus.apps.10.2.2.2.xip.io
+* *Internal DNS*: nexus.ci.svc.cluster.local
 
 Also, important to understand that if OpenShift is configured with the SDN multitenant plugin, you need to allow access to this project (*ci*) from any other project that wants to use it, or by making the ci project global, with:
 
@@ -65,79 +63,160 @@ Also, important to understand that if OpenShift is configured with the SDN multi
 oadm pod-network make-projects-global ci 
 ----
 
+=== Defining your Persistent Volume for using nexus-persistent template
+If you want to create a nexus persistent instance, you need to provide with a persistent volume named: *nexus-pv* with *ReadWriteOnce* mode and the ammount of space that you wish. You can use hostPath, nfs, or any other storage. 
+See examples link:nexus/ose3/resources/pv/[here].
 
-== Install all base images we will be using
-Even if these base images should already be installed with an OpenShift installation, I will assume they are not, as some of the examples will be based on the Com
-
-
-https://raw.githubusercontent.com/openshift/origin/master/examples/image-streams/image-streams-centos7.json
-https://raw.githubusercontent.com/jboss-openshift/application-templates/ose-v1.2.0/jboss-image-streams.json
-
-== Create a version of wildfly and EAP S2I images that will use by default the nexus instance created 
-
-
-== Create a version of templates using this new S2I images
-Using as base the https://raw.githubusercontent.com/jboss-openshift/application-templates/ose-v1.2.0/eap/eap64-basic-s2i.json
-[EAP 6.4 template], I will modify and create a new version that will use the EAP version that we just created.
+As an example (in an all-in-one VM), you can do as root (cluster:admin) the following:
 
 ----
-----
+mkdir /tmp/nexus
 
-== Create a sample application using Wildfly-nexus S2I image
+chmod 777 /tmp/nexus
 
-
-TODO: Clean from here to the bottom
-
-
-== Contents of this repository
-
-=== Nexus image, resources and templates
-
-This will be installed in the *openshift* namespace, as these are the basic resources, images streams, etc... needed by the other resources we'll be creating.
-
-----
-oc create -f nexus/ose3/nexus-resources.json -n openshift
-----
-
-This will create:
-
-* *nexus* ServiceAccount
-
-----
+oc create -f - <<-EOF
 {
-   "kind": "ServiceAccount",
-   "apiVersion": "v1",
-   "metadata": {
-      "name": "nexus",
-      "namespace": "default"
-   }
+    "apiVersion": "v1",
+    "kind": "PersistentVolume",
+    "metadata": {
+        "name": "nexus-pv",
+        "labels": {
+           "type": "local"
+        }
+    },
+    "spec": {
+        "hostPath": {
+            "path": "/tmp/nexus"
+        },
+        "accessModes": [
+            "ReadWriteOnce"
+        ],
+        "capacity": {
+            "storage": "5Gi"
+        },
+        "persistentVolumeReclaimPolicy": "Retain"
+    }
 }
+EOF
+
+oc get scc hostaccess -o json \
+        | sed '/\"users\"/a \"system:serviceaccount:ci:nexus\",'  \
+        | oc replace scc hostaccess -f -
 ----
 
-* *centos/centos7* ImageStream 
+
+== Install new resources that will use Nexus
+I have provided with a file that will install all the required resources needed to work with the Nexus instance provided in the OpenShift install. 
+
+To install the Wildfly version:
+
+----
+oc new-project wildfly-nexus-builds --display-name="Wildfly builds with Nexus" --description="Building Applications in Wildfly using Nexus for dependency management"
+
+oc create -f builders/wildfly-nexus/wildfly-nexus-resources.json
+----
+
+To install the EAP version:
+
+----
+oc new-project eap-nexus-builds --display-name="EAP builds with Nexus" --description="Building Applications in EAP using Nexus for dependency management"
+
+oc create -f builders/eap-nexus/eap-nexus-resources.json
+----
+
+Following there is a description of what these files provide.
+
+=== ImageStreams
+This project will load the required ImageStreams for Wildfly 8.1, Wildfly 9 and Wildfly 10 that are initially defined in the link:https://raw.githubusercontent.com/openshift/origin/master/examples/image-streams/image-streams-centos7.json[openshift origin project].
 
 ----
 {
-   "kind": "ImageStream",
    "apiVersion": "v1",
+   "kind": "ImageStream",
    "metadata": {
-      "name": "centos",
-      "namespace": "openshift"
+      "creationTimestamp": null,
+      "name": "wildfly-8"
    },
    "spec": {
-      "dockerImageRepository": "library/centos:centos7"
+      "tags": [
+         {
+            "from": {
+               "Kind": "ImageStreamTag",
+               "Name": "8.1"
+            },
+            "name": "latest"
+         },
+         {
+            "annotations": {
+               "description": "Build and run Java applications on Wildfly 8.1",
+               "iconClass": "icon-wildfly",
+               "sampleRepo": "https://github.com/bparees/openshift-jee-sample.git",
+               "supports": "wildfly:8.1,jee,java",
+               "tags": "builder,wildfly,java",
+               "version": "8.1"
+            },
+            "from": {
+               "Kind": "DockerImage",
+               "Name": "openshift/wildfly-81-centos7:latest"
+            },
+            "name": "8.1"
+         }
+      ]
    }
 }
+....
 ----
 
-* *nexus* BuildConfig
+Also, it installs the EAP 6.4 ImageStream defined in link:https://raw.githubusercontent.com/jboss-openshift/application-templates/ose-v1.2.0/jboss-image-streams.json[JBoss Openshift application templates] project.
+
+----
+TODO: Copy content here
+----
+
+These ImageStreams provide the base images used. 
+
+We will create a new version of the S2I Builders, and for these, we also create some ImageStreams:
+
+----
+{
+   "apiVersion": "v1",
+   "kind": "ImageStream",
+   "metadata": {
+      "creationTimestamp": null,
+      "name": "wildfly-nexus-8"
+   },
+   "spec": {
+      "tags": [
+         {
+            "annotations": {
+               "description": "Build and run Java applications on Wildfly 8.1 using Nexus",
+               "iconClass": "icon-wildfly",
+               "sampleRepo": "https://github.com/bparees/openshift-jee-sample.git",
+               "supports": "wildfly:8.1,jee,java",
+               "tags": "builder,wildfly,java,nexus",
+               "version": "8.1"
+            },
+            "name": "latest"
+         }
+      ]
+   }
+}
+...
+----
+
+=== S2I Builder images
+I have created an extended version of link:builders/wildfly-nexus/8.1[Wildfly 8.1], link:builders/wildfly-nexus/9.0[Wildfly 9] and link:builders/wildfly-nexus/10.0[Wildfly 10] as well as link:builders/eap-nexus/6.4[EAP 6.4] images where I'm replacing the provided settings.xml file with one of my own, that will look for dependencies in the provided Nexus instance in the OpenShift environment. 
+
+We need a BuildConfig for each of the S2I images so that these images are created and pushed into the appropriate ImageStreams. 
+
+Here we can see the BuildConfig for the Wildfly 8.1 Image:
 
 ----
 {
    "kind": "BuildConfig",
    "apiVersion": "v1",
    "metadata": {
-      "name": "nexus"
+      "name": "wildfly-nexus-8"
    },
    "spec": {
       "triggers": [
@@ -164,23 +243,21 @@ This will create:
             "uri": "https://github.com/jorgemoralespou/nexus-ose",
             "ref": "master"
          },
-         "contextDir": "nexus/nexus-container"
+         "contextDir": "builders/wildfly-nexus/8.1"
       },
       "strategy": {
          "type": "Docker",
          "dockerStrategy": {
             "from": {
                "kind": "ImageStreamTag",
-               "name": "centos:centos7",
-               "namespace": "openshift"
+               "name": "wildfly-8:latest"
             }
          }
       },
       "output": {
          "to": {
             "kind": "ImageStreamTag",
-            "name": "nexus:latest",
-            "namespace": "openshift"
+            "name": "wildfly-nexus-8:latest"
          }
       },
       "resources": {}
@@ -188,374 +265,15 @@ This will create:
 }
 ----
 
-* *nexus* ImageStream
 
-----
-{
-   "kind": "ImageStream",
-   "apiVersion": "v1",
-   "metadata": {
-      "name": "nexus"
-   },
-   "spec": {
-      "dockerImageRepository": "",
-      "tags": [
-         {
-            "name": "latest"
-         }
-      ]
-   }
-}
-----
+===  Templates
+The Wildfly images are builder Images, so you can use it directly for creating applications. On the other hand, EAP provides with some templates for different use cases that can be used. We need to provide our own version of these templates, where we'll be changing the Builder image.
 
-=== Nexus image, resources and templates
+As an example, here I show a changed version of the base https://raw.githubusercontent.com/jboss-openshift/application-templates/ose-v1.2.0/eap/eap64-basic-s2i.json[EAP 6.4 Basic template].
+
+link:builders/eap-nexus/eap-nexus-resources.json#L108-L430[See the code]
+
+== Create a sample application
 
 
-
-* *nexus* PersistenceVolumeClaim
-
-----
-{
-   "kind": "PersistentVolumeClaim",
-   "apiVersion": "v1",
-   "metadata": {
-      "name": "nexus-claim"
-   },
-   "spec": {
-      "accessModes": [
-         "ReadWriteOnce"
-      ],
-      "resources": {
-         "requests": {
-            "storage": "5Gi"
-         }
-      },
-      "volumeName": "nexus-pv"
-   }
-}
-----
-
-* *nexus* DeploymentConfiguration
-
-----
-{
-   "kind": "DeploymentConfig",
-   "apiVersion": "v1",
-   "metadata": {
-      "name": "nexus"
-   },
-   "spec": {
-      "strategy": {
-         "type": "Rolling",
-         "rollingParams": {
-            "updatePeriodSeconds": 1,
-            "intervalSeconds": 1,
-            "timeoutSeconds": 600
-         },
-         "post": {
-            "failurePolicy": "Ignore",
-            "execNewPod": {
-               "containerName": "nexus",
-               "command": [
-                  "/usr/local/bin/addjbossrepos.sh"
-               ]
-            }
-         },
-         "resources": {}
-      },
-      "triggers": [
-         {
-            "type": "ConfigChange"
-         },
-         {
-            "type": "ImageChange",
-            "imageChangeParams": {
-               "automatic": true,
-               "containerNames": [
-                  "nexus"
-               ],
-               "from": {
-                  "kind": "ImageStreamTag",
-                  "name": "nexus:latest"
-               }
-            }
-         }
-      ],
-      "replicas": 1,
-      "selector": {
-         "deploymentconfig": "nexus"
-      },
-      "template": {
-         "metadata": {
-            "labels": {
-               "deploymentconfig": "nexus"
-            }
-         },
-         "spec": {
-            "volumes": [
-               {
-                  "name": "pvol",
-                  "persistentVolumeClaim": {
-                     "claimName": "nexus-claim"
-                  }
-               }
-            ],
-            "containers": [
-               {
-                  "name": "nexus",
-                  "image": "nexus",
-                  "ports": [
-                     {
-                        "containerPort": 8081,
-                        "protocol": "TCP"
-                     }
-                  ],
-                  "volumeMounts": [
-                     {
-                        "name": "pvol",
-                        "mountPath": "/sonatype-work"
-                     }
-                  ],
-                  "livenessProbe": {
-                     "httpGet": {
-                        "port": 8081
-                     },
-                     "initialDelaySeconds": 180,
-                     "timeoutSeconds": 1
-                  },
-                  "readinessProbe": {
-                     "httpGet": {
-                        "port": 8081
-                     },
-                     "initialDelaySeconds": 20,
-                     "timeoutSeconds": 1
-                  },
-                  "resources": {
-                     "limits": {
-                        "memory": "2Gi"
-                     }
-                  },
-                  "terminationMessagePath": "/dev/termination-log",
-                  "imagePullPolicy": "IfNotPresent",
-                  "securityContext": {
-                     "capabilities": {},
-                     "privileged": false
-                  }
-               }
-            ],
-            "restartPolicy": "Always",
-            "dnsPolicy": "ClusterFirst",
-            "serviceAccountName": "nexus",
-            "serviceAccount": "nexus"
-         }
-      }
-   }
-}
-----
-
-* *nexus* Service
-
-----
-{
-   "kind": "Service",
-   "apiVersion": "v1",
-   "metadata": {
-      "name": "nexus"
-   },
-   "spec": {
-      "ports": [
-         {
-            "name": "nexus-http",
-            "port": 8081,
-            "targetPort": 8081
-         }
-      ],
-      "selector": {
-         "deploymentconfig": "nexus"
-      },
-      "type": "ClusterIP",
-      "sessionAffinity": "None"
-   }
-}
-----
-
-* *nexus* Route
-
-----
-{
-   "kind": "Route",
-   "apiVersion": "v1",
-   "metadata": {
-      "name": "nexus"
-   },
-   "spec": {
-      "host": "",
-      "to": {
-         "kind": "Service",
-         "name": "nexus"
-      }
-   }
-}
-----
-
-== Add requiremnts
-
-* Add hostDir Persistent Volume (or NFS)
-
-----
-oc create -f nexus/ose3/old/hostDir-pv.json
-----
-
-* Add the nexus serviceAccount to be able to mount hostDir
-
-----
-oc get scc hostmount -o json \
-        | sed '/\"users\"/a \"system:serviceaccount:default:nexus\",'  \
-        | oc replace scc hostmount -f -
-----
-
-== Run the Nexus container
-Nexus container will run in the openshift-infra project.
-
-NOTE: These steps need to be done as a *cluster admin* user
-
-=== Create a project for your CI tools (nexus)
-All our ci-tools will be created in a special project called *ci-tools*
-
-----
-$ oc new-project ci-tools
-----
-
-And we will be using a special seviceaccount in that project for our CI work. This serviceaccount will be created later.
-
-----
-system:serviceaccount:ci-tools:nexus
-----
-
-=== Create the required persistent volume
-This nexus instance requires persistent volume og 5Gi to run with a volume name of *nexus-pv*.
-
-==== Use hostPath
-As OpenShift 3.1, mounting hostPath requires you a special security constraint, so best thing should be to add the service account that we are creating to the *hostmount* SCC
-
-----
-$ oc get scc hostmount -o json \
-        | sed '/\"users\"/a \"system:serviceaccount:ci-tools:nexus\",'  \
-        | oc replace scc hostmount -f -
----- 
-
-Now, let's create the PV needed. On the OpenShift host, run:
-
-----
-$ mkdir /opt/nexus
-----
-
-Now provision the PV in OpenShift:
-
-----
-$ cat << EOF > /tmp/pv.json
-{
-    "apiVersion": "v1",
-    "kind": "PersistentVolume",
-    "metadata": {
-        "name": "nexus-pv",
-        "labels": {
-           "type": "local"
-        }
-    },
-    "spec": {
-        "hostPath": {
-            "path": "/opt/nexus"
-        },
-        "accessModes": [
-            "ReadWriteOnce"
-        ],
-        "capacity": {
-            "storage": "5Gi"
-        },
-        "persistentVolumeReclaimPolicy": "Retain"
-    }
-}
-EOF
-$ oc create -f /tmp/pv.json
-----
-
-
-==== Use nfs
-If you're using NFS, you need first to have access to the NFS server.
-
-TODO: blablabla
-
-==== Use other
-Find the appropriate documentation for defining the volume itself, the rest of the setup is the same as NFS.
-
-=== Create a nexus instance
-----
-$ oc create -f nexus/ose3/nexus-all.json
-----
-
-NOTE: This will build the nexus image, so it will take a while.
-
-By default, this will be published in: http://nexus-ci-tools.<YOUR_DOMAIN>
-
-You can change the route with:
-
-----
-$ oc edit route nexus
-----
-
-NOTE: In this example I will change it to nexus.example.com
-
-=== Test your nexus instance
-As you have installed the nexus in the ci-tools project, the fastest way to see it running is accesing the DNS that you have assigned to your nexus server.
-
-In a broser, access your the provided DNS. http://nexus.example.com[In my example]
-
-NOTE: By default, nexus credentials will be *admin/admin123*)
-
-=== Details to know
-The service we just created is internally accesible at:
-
-* *External DNS*: nexus.example.com
-* *Internal DNS*: nexus.ci-tools.svc.cluster.local
-
-This means that we can use this internal DNS address in our application to point to the nexus server.
-
-== Create your application
-We are going to demonstrate how you can use this nexus server in different runtimes.
-
-NOTE: These steps can be run as a regular user.
-
-* The first thing we need to do is create a project for our applications. We will call it sample.
-
-----
-$ oc new-project sample
-----
-
-* Now we are going to import our predefined set of templates for creating applications with these runtimes.
-
-----
-$ 
-----
-
-
-=== Using EAP
-
-==== Import your EAP templates
-If you are using Origin, you must import the application server templates we are going to be using. For OSE the templates are already there. 
-
-----
-$ oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/eap/eap6-basic-sti.json
-$ oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/secrets/eap-app-secret.json
-----
-
-
-=== Using Wildfly
-As we need to have a special builder image, we will be building and updating the "official" builder image for Wildfly to be able to have our default settings.xml and also to be able to overwrite
-our settings.xml at will if we place a settings.xml file in our application source folder.
-
-
-
-
-=== Using Spring Boot
-
+=== Sample Wildfly-nexus S2I image
