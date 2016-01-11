@@ -48,8 +48,10 @@ RUN  /usr/local/bin/fixPermissions.sh /opt/nexus
 RUN  /usr/local/bin/fixPermissions.sh $NEXUS_WORK
 RUN  /usr/local/bin/fixPermissions.sh $NEXUS_REPOS
 
-RUN mkdir /conf
-RUN /usr/local/bin/fixPermissions.sh /conf
+RUN mkdir $NEXUS_HOME/conf
+# Copy nexus.xml as a workaround until post-deployment scripts work
+COPY scripts/nexus.xml $NEXUS_HOME/conf/
+RUN /usr/local/bin/fixPermissions.sh $NEXUS_HOME/conf
 
 USER jboss
 
