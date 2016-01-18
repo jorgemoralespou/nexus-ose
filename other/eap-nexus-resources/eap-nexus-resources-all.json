@@ -1,0 +1,242 @@
+{
+    "kind": "List",
+    "apiVersion": "v1",
+    "metadata": {},
+    "items": [
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "eap-sample",
+                "labels": {
+                    "app": "eap-sample"
+                }
+            },
+            "spec": {
+                "triggers": [
+                    {
+                        "type": "Generic",
+                        "generic": {
+                            "secret": "361523712f6fc572"
+                        }
+                    },
+                    {
+                        "type": "GitHub",
+                        "github": {
+                            "secret": "100849c2c1c534f0"
+                        }
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChange": {
+                            "lastTriggeredImageID": "registry.access.redhat.com/jboss-eap-6/eap64-openshift:1.2"
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "source": {
+                    "type": "Git",
+                    "git": {
+                        "uri": "https://github.com/jboss-developer/jboss-eap-quickstarts.git",
+                        "ref": "6.4.x"
+                    },
+                    "contextDir": "kitchensink"
+                },
+                "strategy": {
+                    "type": "Source",
+                    "sourceStrategy": {
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "namespace": "openshift",
+                            "name": "jboss-eap64-openshift:1.2"
+                        },
+                        "env": [
+                            {
+                                "name": "MAVEN_MIRROR_URL",
+                                "value": "http://nexus.ci.svc.cluster.local:8081/content/groups/public/"
+                            }
+                        ]
+                    }
+                },
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "eap-sample:latest"
+                    }
+                },
+                "resources": {}
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "eap-sample",
+                "labels": {
+                    "app": "eap-sample"
+                }
+            },
+            "spec": {},
+            "status": {
+                "dockerImageRepository": "",
+                "tags": [
+                    {
+                        "tag": "latest"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "sample-nexus",
+                "labels": {
+                    "app": "sample-nexus"
+                }
+            },
+            "spec": {}
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "eap-sample",
+                "labels": {
+                    "app": "eap-sample"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Rolling",
+                    "rollingParams": {
+                        "updatePeriodSeconds": 1,
+                        "intervalSeconds": 1,
+                        "timeoutSeconds": 600,
+                        "maxUnavailable": "25%",
+                        "maxSurge": "25%"
+                    },
+                    "resources": {}
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "eap-sample"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "eap-sample:latest"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "deploymentconfig": "eap-sample"
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app": "eap-sample",
+                            "deploymentconfig": "eap-sample"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "eap-sample",
+                                "image": "eap-sample",
+                                "ports": [
+                                    {
+                                        "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "containerPort": 8443,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "containerPort": 8778,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "resources": {},
+                                "terminationMessagePath": "/dev/termination-log",
+                                "imagePullPolicy": "Always"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {}
+                    }
+                }
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "eap-sample",
+                "labels": {
+                    "app": "eap-sample"
+                }
+            },
+            "spec": {
+                "host": "",
+                "to": {
+                    "kind": "Service",
+                    "name": "eap-sample"
+                },
+                "port": {
+                    "targetPort": 8080
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "eap-sample",
+                "labels": {
+                    "app": "eap-sample"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "8080-tcp",
+                        "protocol": "TCP",
+                        "port": 8080,
+                        "targetPort": 8080
+                    },
+                    {
+                        "name": "8443-tcp",
+                        "protocol": "TCP",
+                        "port": 8443,
+                        "targetPort": 8443
+                    },
+                    {
+                        "name": "8778-tcp",
+                        "protocol": "TCP",
+                        "port": 8778,
+                        "targetPort": 8778
+                    }
+                ],
+                "selector": {
+                    "deploymentconfig": "eap-sample"
+                },
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+            }
+        }
+    ]
+}
