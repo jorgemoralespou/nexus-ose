@@ -8,12 +8,11 @@
          "apiVersion": "v1",
          "metadata": {
             "name": "eap-incremental",
-            "creationTimestamp": null,
             "labels": {
                "app": "eap-incremental"
-            },
-            "annotations": {
-               "openshift.io/generated-by": "OpenShiftWebConsole"
+                },
+                "annotations": {
+                    "openshift.io/generated-by": "OpenShiftWebConsole"
             }
          },
          "spec": {
@@ -53,8 +52,7 @@
                      "kind": "ImageStreamTag",
                      "namespace": "openshift",
                      "name": "jboss-eap64-openshift:1.2"
-                  },
-                  "incremental": true
+                  }
                }
             },
             "output": {
@@ -64,9 +62,6 @@
                }
             },
             "resources": {}
-         },
-         "status": {
-            "lastVersion": 0
          }
       },
       {
@@ -74,18 +69,16 @@
          "apiVersion": "v1",
          "metadata": {
             "name": "eap-incremental",
-            "creationTimestamp": null,
             "labels": {
                "app": "eap-incremental"
-            },
-            "annotations": {
-               "openshift.io/generated-by": "OpenShiftWebConsole",
-               "openshift.io/image.dockerRepositoryCheck": "2016-01-11T14:57:38Z"
             }
          },
-         "spec": {},
-         "status": {
-            "dockerImageRepository": ""
+         "spec": {
+            "tags": [
+               {
+                  "name": "latest"
+               }
+            ]
          }
       },
       {
@@ -93,12 +86,8 @@
          "apiVersion": "v1",
          "metadata": {
             "name": "eap-incremental",
-            "creationTimestamp": null,
             "labels": {
                "app": "eap-incremental"
-            },
-            "annotations": {
-               "openshift.io/generated-by": "OpenShiftWebConsole"
             }
          },
          "spec": {
@@ -137,7 +126,6 @@
             },
             "template": {
                "metadata": {
-                  "creationTimestamp": null,
                   "labels": {
                      "app": "eap-incremental",
                      "deploymentconfig": "eap-incremental"
@@ -147,7 +135,7 @@
                   "containers": [
                      {
                         "name": "eap-incremental",
-                        "image": "eap-incremental:latest",
+                        "image": "eap-incremental",
                         "ports": [
                            {
                               "containerPort": 8080,
@@ -173,21 +161,15 @@
                   "securityContext": {}
                }
             }
-         },
-         "status": {}
+         }
       },
       {
          "kind": "Route",
          "apiVersion": "v1",
          "metadata": {
             "name": "eap-incremental",
-            "creationTimestamp": null,
             "labels": {
                "app": "eap-incremental"
-            },
-            "annotations": {
-               "openshift.io/generated-by": "OpenShiftWebConsole",
-               "openshift.io/host.generated": "true"
             }
          },
          "spec": {
@@ -199,20 +181,15 @@
             "port": {
                "targetPort": 8080
             }
-         },
-         "status": {}
+         }
       },
       {
          "kind": "Service",
          "apiVersion": "v1",
          "metadata": {
             "name": "eap-incremental",
-            "creationTimestamp": null,
             "labels": {
                "app": "eap-incremental"
-            },
-            "annotations": {
-               "openshift.io/generated-by": "OpenShiftWebConsole"
             }
          },
          "spec": {
@@ -241,9 +218,6 @@
             },
             "type": "ClusterIP",
             "sessionAffinity": "None"
-         },
-         "status": {
-            "loadBalancer": {}
          }
       }
    ]
