@@ -51,9 +51,8 @@
                "type": "Docker",
                "dockerStrategy": {
                   "from": {
-                     "kind": "ImageStreamTag",
-                     "name": "centos:7",
-                     "namespace": "ci"
+                     "kind": "DockerImage",
+                     "name": "centos:7"
                   }
                }
             },
