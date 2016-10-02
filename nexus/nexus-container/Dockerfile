@@ -40,13 +40,13 @@ COPY scripts/fixPermissions.sh /usr/local/bin/fixPermissions.sh
 COPY scripts/addrepo.sh /usr/local/bin/addrepo.sh
 COPY scripts/addjbossrepos.sh /usr/local/bin/addjbossrepos.sh
 
-RUN chmod 755 /usr/local/bin/fixPermissions.sh 
-RUN chmod 755 /usr/local/bin/readinessProbe.sh
-RUN chmod 755 /usr/local/bin/addrepo.sh
-RUN chmod 755 /usr/local/bin/addjbossrepos.sh
-RUN  /usr/local/bin/fixPermissions.sh /opt/nexus
-RUN  /usr/local/bin/fixPermissions.sh $NEXUS_WORK
-RUN  /usr/local/bin/fixPermissions.sh $NEXUS_REPOS
+RUN chmod 755 /usr/local/bin/fixPermissions.sh \
+  && chmod 755 /usr/local/bin/readinessProbe.sh \
+  && chmod 755 /usr/local/bin/addrepo.sh \
+  && chmod 755 /usr/local/bin/addjbossrepos.sh \
+  && /usr/local/bin/fixPermissions.sh /opt/nexus \
+  && /usr/local/bin/fixPermissions.sh $NEXUS_WORK \
+  && /usr/local/bin/fixPermissions.sh $NEXUS_REPOS
 
 RUN mkdir /conf
 RUN /usr/local/bin/fixPermissions.sh /conf
