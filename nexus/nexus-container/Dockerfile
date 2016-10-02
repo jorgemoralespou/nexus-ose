@@ -29,7 +29,7 @@ RUN mkdir -p /opt/nexus/nexus \
   && mv /tmp/nexus-${NEXUS_VERSION}/* /opt/nexus/nexus/ \
   && rm -rf /tmp/nexus-${NEXUS_VERSION}
 
-RUN  chmod 777 $NEXUS_HOME \ 
+RUN chmod 777 $NEXUS_HOME \
    && mkdir -p $NEXUS_WORK && chmod -R 777 $NEXUS_WORK \
    && mkdir -p $NEXUS_REPOS && chmod -R 777 $NEXUS_REPOS 
 
