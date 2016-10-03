@@ -1,0 +1,5 @@
+{
+  "name": "redhat-ga-repo",
+  "type": "groovy",
+  "content": "repository.createMavenProxy('redhat-ga','https://maven.repository.redhat.com/ga/')"
+}

@@ -1,0 +1,5 @@
+{
+  "name": "redhat-techpreview-all-repo",
+  "type": "groovy",
+  "content": "repository.createMavenProxy('redhat-techpreview-all','https://maven.repository.redhat.com/techpreview/all/')"
+}

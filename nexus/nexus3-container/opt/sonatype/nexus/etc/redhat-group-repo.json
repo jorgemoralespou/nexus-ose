@@ -1,0 +1,5 @@
+{
+  "name": "redhat-group-repo",
+  "type": "groovy",
+  "content": "repository.createMavenGroup('redhat-group', ['maven-central','jboss-public','redhat-techpreview-all','redhat-ga'])"
+}
