@@ -9,7 +9,7 @@
          "kind": "ServiceAccount",
          "apiVersion": "v1",
          "metadata": {
-            "name": "nexus3",
+            "name": "nexus",
             "namespace": "ci"
          }
       },
@@ -37,6 +37,9 @@
                {
                   "type": "ImageChange",
                   "imageChange": {}
+               },
+               {
+                  "type": "ConfigChange"
                }
             ],
             "source": {
@@ -142,19 +145,22 @@
                },
                "spec": {
                   "strategy": {
-                     "type": "Rolling",
-                     "rollingParams": {
-                        "updatePeriodSeconds": 1,
-                        "intervalSeconds": 1,
-                        "timeoutSeconds": 600
-                     },
-                     "post": {
-                        "failurePolicy": "Ignore",
-                        "execNewPod": {
-                           "containerName": "nexus3",
-                           "command": [
-                              "/usr/local/bin/addjbossrepos.sh"
-                           ]
+                     "type": "Recreate",
+                     "recreateParams": {
+                        "post": {
+                           "failurePolicy": "Ignore",
+                           "execNewPod": {
+                              "containerName": "nexus3",
+                              "command": [
+                                 "/usr/local/bin/addjbossrepos.sh"
+                              ],
+                              "env": [
+                                 {
+                                    "name": "NEXUS_BASE_URL",
+                                    "value":"http://nexus:8081"
+                                 }
+                              ]
+                           }
                         }
                      },
                      "resources": {}
@@ -250,8 +256,8 @@
                         ],
                         "restartPolicy": "Always",
                         "dnsPolicy": "ClusterFirst",
-                        "serviceAccountName": "nexus3",
-                        "serviceAccount": "nexus3"
+                        "serviceAccountName": "nexus",
+                        "serviceAccount": "nexus"
                      }
                   }
                }
@@ -370,19 +376,22 @@
                },
                "spec": {
                   "strategy": {
-                     "type": "Rolling",
-                     "rollingParams": {
-                        "updatePeriodSeconds": 1,
-                        "intervalSeconds": 1,
-                        "timeoutSeconds": 600
-                     },
-                     "post": {
-                        "failurePolicy": "Ignore",
-                        "execNewPod": {
-                           "containerName": "nexus3",
-                           "command": [
-                              "/usr/local/bin/addjbossrepos.sh"
-                           ]
+                     "type": "Recreate",
+                     "recreateParams": {
+                        "post": {
+                           "failurePolicy": "Ignore",
+                           "execNewPod": {
+                              "containerName": "nexus3",
+                              "command": [
+                                 "/usr/local/bin/addjbossrepos.sh"
+                              ],
+                              "env": [
+                                 {
+                                    "name": "NEXUS_BASE_URL",
+                                    "value":"http://nexus:8081"
+                                 }
+                              ]
+                           }
                         }
                      },
                      "resources": {}
@@ -478,8 +487,8 @@
                         ],
                         "restartPolicy": "Always",
                         "dnsPolicy": "ClusterFirst",
-                        "serviceAccountName": "nexus3",
-                        "serviceAccount": "nexus3"
+                        "serviceAccountName": "nexus",
+                        "serviceAccount": "nexus"
                      }
                   }
                }
