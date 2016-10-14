@@ -2,7 +2,7 @@ FROM centos:7
 
 EXPOSE 8081
 
-ENV NEXUS_VERSION 2.11.4-01
+ENV NEXUS_VERSION 2.14.0-01
 ENV NEXUS_HOME /opt/nexus/nexus
 ENV NEXUS_WORK /sonatype-work
 ENV NEXUS_REPOS /repositories
@@ -10,9 +10,9 @@ ENV NEXUS_REPOS /repositories
 RUN cd /var/tmp \
   && curl --fail --silent --location --retry 3 -O \
   --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
-  http://download.oracle.com/otn-pub/java/jdk/7u76-b13/jdk-7u76-linux-x64.rpm \
-  && rpm -Ui jdk-7u76-linux-x64.rpm \
-  && rm -rf jdk-7u76-linux-x64.rpm
+  http://download.oracle.com/otn-pub/java/jdk/8u101-b13/jdk-8u101-linux-x64.rpm \
+  && rpm -Ui jdk-8u101-linux-x64.rpm \
+  && rm -rf jdk-8u101-linux-x64.rpm
 
 # Install jq
 RUN curl --fail --silent --location --retry 3 \
@@ -29,7 +29,7 @@ RUN mkdir -p /opt/nexus/nexus \
   && mv /tmp/nexus-${NEXUS_VERSION}/* /opt/nexus/nexus/ \
   && rm -rf /tmp/nexus-${NEXUS_VERSION}
 
-RUN  chmod 777 $NEXUS_HOME \ 
+RUN chmod 777 $NEXUS_HOME \
    && mkdir -p $NEXUS_WORK && chmod -R 777 $NEXUS_WORK \
    && mkdir -p $NEXUS_REPOS && chmod -R 777 $NEXUS_REPOS 
 
@@ -40,13 +40,13 @@ COPY scripts/fixPermissions.sh /usr/local/bin/fixPermissions.sh
 COPY scripts/addrepo.sh /usr/local/bin/addrepo.sh
 COPY scripts/addjbossrepos.sh /usr/local/bin/addjbossrepos.sh
 
-RUN chmod 755 /usr/local/bin/fixPermissions.sh 
-RUN chmod 755 /usr/local/bin/readinessProbe.sh
-RUN chmod 755 /usr/local/bin/addrepo.sh
-RUN chmod 755 /usr/local/bin/addjbossrepos.sh
-RUN  /usr/local/bin/fixPermissions.sh /opt/nexus
-RUN  /usr/local/bin/fixPermissions.sh $NEXUS_WORK
-RUN  /usr/local/bin/fixPermissions.sh $NEXUS_REPOS
+RUN chmod 755 /usr/local/bin/fixPermissions.sh \
+  && chmod 755 /usr/local/bin/readinessProbe.sh \
+  && chmod 755 /usr/local/bin/addrepo.sh \
+  && chmod 755 /usr/local/bin/addjbossrepos.sh \
+  && /usr/local/bin/fixPermissions.sh /opt/nexus \
+  && /usr/local/bin/fixPermissions.sh $NEXUS_WORK \
+  && /usr/local/bin/fixPermissions.sh $NEXUS_REPOS
 
 RUN mkdir /conf
 RUN /usr/local/bin/fixPermissions.sh /conf
