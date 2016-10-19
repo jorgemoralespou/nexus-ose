@@ -45,8 +45,8 @@
             "source": {
                "type": "Git",
                "git": {
-                  "uri": "https://github.com/garethahealy/nexus-ose",
-                  "ref": "v3"
+                  "uri": "https://github.com/jorgemoralespou/nexus-ose",
+                  "ref": "master"
                },
                "contextDir": "nexus/nexus3-container"
             },
@@ -152,12 +152,13 @@
                            "execNewPod": {
                               "containerName": "nexus3",
                               "command": [
+                                 "/bin/bash",
                                  "/usr/local/bin/addjbossrepos.sh"
                               ],
                               "env": [
                                  {
                                     "name": "NEXUS_BASE_URL",
-                                    "value":"http://nexus:8081"
+                                    "value":"http://nexus3:8081"
                                  }
                               ]
                            }
@@ -388,7 +389,7 @@
                               "env": [
                                  {
                                     "name": "NEXUS_BASE_URL",
-                                    "value":"http://nexus:8081"
+                                    "value":"http://nexus3:8081"
                                  }
                               ]
                            }

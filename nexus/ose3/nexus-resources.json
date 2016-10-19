@@ -150,6 +150,7 @@
                            "execNewPod": {
                               "containerName": "nexus",
                               "command": [
+                                 "/bin/bash",
                                  "/usr/local/bin/addjbossrepos.sh"
                               ],
                               "env": [
