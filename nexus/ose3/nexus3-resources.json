@@ -158,7 +158,7 @@
                               "env": [
                                  {
                                     "name": "NEXUS_BASE_URL",
-                                    "value":"http://nexus:8081"
+                                    "value":"http://nexus3:8081"
                                  }
                               ]
                            }
@@ -389,7 +389,7 @@
                               "env": [
                                  {
                                     "name": "NEXUS_BASE_URL",
-                                    "value":"http://nexus:8081"
+                                    "value":"http://nexus3:8081"
                                  }
                               ]
                            }
