@@ -45,8 +45,8 @@
             "source": {
                "type": "Git",
                "git": {
-                  "uri": "https://github.com/garethahealy/nexus-ose",
-                  "ref": "v3"
+                  "uri": "https://github.com/jorgemoralespou/nexus-ose",
+                  "ref": "master"
                },
                "contextDir": "nexus/nexus3-container"
             },
