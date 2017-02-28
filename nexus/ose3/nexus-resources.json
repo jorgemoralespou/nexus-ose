@@ -9,16 +9,14 @@
          "kind": "ServiceAccount",
          "apiVersion": "v1",
          "metadata": {
-            "name": "nexus",
-            "namespace": "ci"
+            "name": "nexus"
          }
       },
       {
          "kind": "BuildConfig",
          "apiVersion": "v1",
          "metadata": {
-            "name": "nexus",
-            "namespace": "ci"
+            "name": "nexus"
          },
          "spec": {
             "triggers": [
@@ -59,8 +57,7 @@
             "output": {
                "to": {
                   "kind": "ImageStreamTag",
-                  "name": "nexus:latest",
-                  "namespace": "ci"
+                  "name": "nexus:latest"
                }
             },
             "resources": {}
@@ -70,8 +67,7 @@
          "kind": "ImageStream",
          "apiVersion": "v1",
          "metadata": {
-            "name": "centos",
-            "namespace": "ci"
+            "name": "centos"
          },
          "spec": {
             "dockerImageRepository": "library/centos:centos7"
@@ -81,8 +77,7 @@
          "kind": "ImageStream",
          "apiVersion": "v1",
          "metadata": {
-            "name": "nexus",
-            "namespace": "ci"
+            "name": "nexus"
          },
          "spec": {
             "dockerImageRepository": "",
@@ -98,7 +93,6 @@
          "apiVersion": "v1",
          "metadata": {
             "name": "nexus-ephemeral",
-            "namespace": "ci",
             "annotations": {
                "description": "Nexus service, with ephemeral storage. Scaling to more than one replica is not supported",
                "tags": "repository-managers,nexus"
@@ -138,8 +132,7 @@
                "kind": "DeploymentConfig",
                "apiVersion": "v1",
                "metadata": {
-                  "name": "nexus",
-                  "namespace": "ci"
+                  "name": "nexus"
                },
                "spec": {
                   "strategy": {
@@ -177,8 +170,7 @@
                            ],
                            "from": {
                               "kind": "ImageStreamTag",
-                              "name": "${IMAGE_NAME}:${IMAGE_TAG}",
-                              "namespace": "ci"
+                              "name": "${IMAGE_NAME}:${IMAGE_TAG}"
                            }
                         }
                      }
@@ -257,8 +249,7 @@
                "kind": "Route",
                "apiVersion": "v1",
                "metadata": {
-                  "name": "nexus",
-                  "namespace": "ci"
+                  "name": "nexus"
                },
                "spec": {
                   "host": "${APPLICATION_HOSTNAME}",
@@ -272,8 +263,7 @@
                "kind": "Service",
                "apiVersion": "v1",
                "metadata": {
-                  "name": "nexus",
-                  "namespace": "ci"
+                  "name": "nexus"
                },
                "spec": {
                   "ports": [
@@ -297,7 +287,6 @@
          "apiVersion": "v1",
          "metadata": {
             "name": "nexus-persistent",
-            "namespace": "ci",
             "annotations": {
                "description": "Nexus service, with persistent storage. Scaling to more than one replica is not supported",
                "tags": "repository-managers,nexus"
@@ -343,8 +332,7 @@
                "kind": "PersistentVolumeClaim",
                "apiVersion": "v1",
                "metadata": {
-                  "name": "nexus-claim",
-                  "namespace": "ci"
+                  "name": "nexus-claim"
                },
                "spec": {
                   "accessModes": [
@@ -362,8 +350,7 @@
                "kind": "DeploymentConfig",
                "apiVersion": "v1",
                "metadata": {
-                  "name": "nexus",
-                  "namespace": "ci"
+                  "name": "nexus"
                },
                "spec": {
                   "strategy": {
@@ -400,8 +387,7 @@
                            ],
                            "from": {
                               "kind": "ImageStreamTag",
-                              "name": "${IMAGE_NAME}:${IMAGE_TAG}",
-                              "namespace": "ci"
+                              "name": "${IMAGE_NAME}:${IMAGE_TAG}"
                            }
                         }
                      }
@@ -480,8 +466,7 @@
                "kind": "Route",
                "apiVersion": "v1",
                "metadata": {
-                  "name": "nexus",
-                  "namespace": "ci"
+                  "name": "nexus"
                },
                "spec": {
                   "host": "${APPLICATION_HOSTNAME}",
@@ -495,8 +480,7 @@
                "kind": "Service",
                "apiVersion": "v1",
                "metadata": {
-                  "name": "nexus",
-                  "namespace": "ci"
+                  "name": "nexus"
                },
                "spec": {
                   "ports": [
